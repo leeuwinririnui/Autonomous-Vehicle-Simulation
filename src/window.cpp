@@ -1,5 +1,8 @@
-#include "core.h"
-#include "shape.cpp"
+#include "window.h"
+#include "shape.h"
+
+SimWindow::SimWindow(std::string title, int width, int height, int framerate) 
+    : title(title), width(width), height(height), framerate(framerate) {}
 
 bool SimWindow::createWindow() {
     window = std::make_shared<sf::RenderWindow>(
@@ -26,22 +29,27 @@ bool SimWindow::createWindow() {
     return true;
 }
 
-void SimWindow::mainLoop(std::shared_ptr<Vehicle> vehicle, std::shared_ptr<Goal> goal) {
+void SimWindow::mainLoop(
+    std::shared_ptr<Vehicle>& vehicle, 
+    std::shared_ptr<Goal>& goal,
+    std::shared_ptr<sf::Vector2f>& boundaries
+) {
     while (window->isOpen()) {
         sf::Event event;
         while (window->pollEvent(event)) {
-            if (event.type == sf::Event::Closed) window->close();
+            if (event.type == sf::Event::Closed) {
+                window->close();
+            }
         }
 
-        sf::Vector2f vPos = vehicle->getRect()->getPosition();
-        sf::Vector2f gPos = goal->getRect()->getPosition();
-
-        if (vPos.x < gPos.x) {
-            vehicle->getRect()->setPosition(vPos.x + 2, vPos.y);
-        }
-
-        if (vPos.y < gPos.y) {
-            vehicle->getRect()->setPosition(vPos.x, vPos.y + 2);
+        goal->checkParked(vehicle);
+        vehicle->moveVehicle(goal);
+        if (!goal->getParked()) {
+            if (!goal->getMoving()) {
+                goal->setDestination(boundaries);
+            } else {
+                goal->moveGoal(boundaries);
+            }
         }
 
         window->clear(sf::Color::Black);
@@ -50,3 +58,9 @@ void SimWindow::mainLoop(std::shared_ptr<Vehicle> vehicle, std::shared_ptr<Goal>
         window->display();
     }
 }
+
+std::shared_ptr<sf::RenderWindow> SimWindow::getWindow() { return window; }
+int SimWindow::getX() { return x; }
+int SimWindow::getY() { return y; }
+int SimWindow::getWidth() { return width; }
+int SimWindow::getHeight() { return height; }

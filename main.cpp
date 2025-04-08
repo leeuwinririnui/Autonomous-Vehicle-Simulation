@@ -1,37 +1,19 @@
-#include "window.cpp"
+#include "init.h"
 
 int main() {
-    std::shared_ptr<SimWindow> window = std::make_shared<SimWindow>(
-        "Autonomous Vehicle Simulation", 
-        800, 
-        600,
-        60
-    );
+    std::shared_ptr<SimWindow> window;
+    std::shared_ptr<Vehicle> vehicle;
+    std::shared_ptr<Goal> goal;
+    std::shared_ptr<sf::Vector2f> boundaries;
 
-    std::shared_ptr<Vehicle> vehicle = std::make_shared<Vehicle>(
-        "Vehicle",
-        0,
-        window->getHeight() / 2,
-        30,
-        15,
-        200, 
-        30, 
-        45
-    );
-
-    std::shared_ptr<Goal> goal = std::make_shared<Goal>(
-        "Goal",
-        window->getWidth() - 30,
-        window->getHeight() / 2,
-        30,
-        15,
-        255, 
-        255, 
-        255  
-    );
+    initializeSimulation(window, vehicle, goal, boundaries);
 
     window->createWindow();
-    window->mainLoop(vehicle, goal);
+    window->mainLoop(vehicle, goal, boundaries);
+
+    std::string confirm;
+    std::cout << "Confirm Exit: ";
+    getline(std::cin, confirm);
 
     return 0;
 }
